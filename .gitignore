@@ -1,0 +1,6 @@
+#DO NOT COMMIT APIKEY.ENV
+*.env
+
+__pycache__/
+.idea/
+.vscode/

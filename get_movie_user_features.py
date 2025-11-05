@@ -1,6 +1,7 @@
 from data_extraction import get_all_features_numpy
 import torch
 torch.set_printoptions(threshold=torch.inf)
+import numpy as np
 
 import pandas as pd
 movies_arr, ratings_arr, users_arr = get_all_features_numpy()
@@ -45,6 +46,8 @@ genres_dict = {
 
 
 
+
+
 # simple movie feature vector, for each movie we give them
 # a 17 dimensional array where each dimension represents a certain
 # genre. If a movie is tagged with a genre then x[genre] = 1, 0 otherwise.
@@ -78,8 +81,27 @@ def generate_movie_features(movies_arr):
 # future idea: we can also include a users favoured genres
 
 def generate_user_features(users_arr,ratings_arr):
-    print(users_arr.shape)
-    print(ratings_arr.shape)
+    # print(users_arr.shape) -> (6040, 5)
+    # print(ratings_arr.shape) -> (1000208, 4)
+    num_users = len(users_arr)
+    user_features = np.zeros((num_users,3955)) # default value for each movie will be 0, and we update the indexes corresponding to the movies the user has watched.
+    
+    # convert users_arr to a dataframe (easier to work with)
+    users_df = pd.DataFrame(users_arr)
+    users_df.columns = ["user_id", "gender", "age", "occupation", "zip"]
 
 
-generate_user_features(users_arr,ratings_arr)
+    # populate the first 3 columns of the feature vectors for the users
+    user_features[:,0] = users_df["gender"].map(gender_map) # first column - gender
+    user_features[:,1] = users_df["age"].map(age_group_map) # second column - age group
+    user_features[:,2] = users_df["occupation"] # third column - occupation
+
+    # go through all users    
+    for i in range(num_users):
+        user_ratings = ratings_arr[ratings_arr[:,0] == i] # creates a list of all the movies the user has watched
+        for movie_id in user_ratings[:,1]: # iterates through the list of movies the user has watched
+            user_features[i, movie_id + 2] = 1  # sets the corresponding index to 1, since they have watched it
+    
+    return user_features
+
+print(generate_user_features(users_arr,ratings_arr)[:10,:20])

@@ -3,8 +3,12 @@ from data_extraction import get_movies_numpy
 import requests
 import os
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_KEY = os.getenv('API_KEY')
 FILE_NAME = "movies_omdb.json"
-API_KEY = "deceec6f"
 
 def get_tmbd_poser():
     movies = get_movies_numpy()
